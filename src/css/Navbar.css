@@ -55,8 +55,8 @@
 }
 
 .sidebar-profile-img {
-  width: 56px;
-  height: 56px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
@@ -110,4 +110,111 @@
     right: 1rem;
     top: 70px;
   }
+}
+
+/* Position the profile to top-right of the page */
+.sidebar-profile {
+  position: absolute;
+  top: 1.25rem;
+  right: 4rem;
+  margin-top: 0;
+  padding: 0;
+  z-index: 20;
+}
+
+/* Improve dropdown style */
+.sidebar-dropdown {
+  position: absolute;
+  top: 3rem;
+  right: -3rem;
+  min-width: 160px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar-dropdown a {
+  text-decoration: none;
+  color: #1e3d24;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.sidebar-dropdown a:hover {
+  background-color: #e9f5ec;
+  padding-left: 0.75rem;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 0.75rem;
+  color: #1e3d24;
+}
+
+.modal-content p {
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-buttons .btn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.modal-buttons .btn.cancel {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modal-buttons .btn.cancel:hover {
+  background: #ccc;
+}
+
+.modal-buttons .btn.confirm {
+  background: #285c1d;
+  color: white;
+}
+
+.modal-buttons .btn.confirm:hover {
+  background: #1e3d24;
 }

@@ -1,14 +1,26 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import profile from "../images/profile.jpg";
 import logo from "../images/newlogo.png";
 import "../css/Navbar.css";
 
 export default function Navbar() {
     const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false); // NEW
+    const navigate = useNavigate(); // NEW
 
     const toggleDropdown = () => {
         setDropdownVisible(!dropdownVisible);
+    };
+
+    const handleLogoutClick = (e) => {
+        e.preventDefault(); // Prevent immediate navigation
+        setShowLogoutModal(true); // Open modal
+    };
+
+    const confirmLogout = () => {
+        setShowLogoutModal(false);
+        navigate("/userlogin"); // Redirect to logout
     };
 
     return (
@@ -37,10 +49,24 @@ export default function Navbar() {
                 {dropdownVisible && (
                     <div className="sidebar-dropdown">
                         <Link to="/profile">Profile</Link>
-                        <Link to="/userlogin">Logout</Link>
+                        <a href="/userlogin" onClick={handleLogoutClick}>Logout</a> {/* Intercepted */}
                     </div>
                 )}
             </div>
+
+            {/* Confirmation Modal */}
+            {showLogoutModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Confirm Logout</h3>
+                        <p>Are you sure you want to log out?</p>
+                        <div className="modal-buttons">
+                            <button className="btn cancel" onClick={() => setShowLogoutModal(false)}>Cancel</button>
+                            <button className="btn confirm" onClick={confirmLogout}>Logout</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

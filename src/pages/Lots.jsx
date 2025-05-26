@@ -341,10 +341,10 @@ export default function Lots() {
             <h3>{selectedLot.lotName}</h3>
             <div className="modal-icons">
               <button onClick={viewHistory} title="View History">
-                📜
+                History
               </button>
               <button onClick={deleteLot} title="Delete Lot">
-                🗑️
+                Delete
               </button>
 
               <button onClick={closeViewModal}>Close</button>
