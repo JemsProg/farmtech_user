@@ -1,0 +1,141 @@
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    }
+
+    :root {
+        --primary-color : #316109;
+    }
+
+    .userlogin-container {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        
+    }
+
+    .userlogin-left{
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+    }
+
+    .userlogin-title-container {
+        width: 100%;
+        padding: 20px;
+    }   
+
+    .userlogin-title {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+
+    }
+
+
+    .userlogin-title-container span {
+        color: black;
+    }
+
+    .userlogin-left-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .userlogin-left-content h1{
+        font-size: 4rem;
+    }
+
+    .userlogin-left-input {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        width: 100%;
+    }
+
+    .userlogin-left-input input {
+        width: 170%;
+        padding: 10px;
+        margin: 10px 0;
+        margin-bottom: 1%;
+        border-radius: 5px;
+        border: 1px solid #ccc;  
+    }
+
+    .userlogin-forgot {
+        display: flex;
+        margin-top: 0%;
+        margin-bottom: 10%;
+        justify-content: flex-start;
+        width: 100%; 
+        color: gray;  
+    }
+
+    .userlogin-button {
+        width: 40%;
+        margin-top: 10px;
+        display: flex;
+    }
+
+    .userlogin-button a {
+        text-decoration: none;
+        color: white;
+    }
+
+    .userlogin-login-btn {
+        width: 100%;
+        border-radius: 20px;
+        padding: 8px;
+        border: none;
+        background-color: var(--primary-color);
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .userlogin-noaccount {
+        margin-top: 20px;
+        color: gray;
+    }
+    .userlogin-noaccount span {
+        color: var(--primary-color);
+        cursor: pointer;    
+        margin-left: 5px;
+    }
+
+    .userlogin-right-content {
+        width: 50%;
+        background-image: url("../images/gr.png");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .userlogin-right-content img {
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .userlogin-forgot a {
+        text-decoration: none;
+        color: gray;
+    }
+
+    .userlogin-noaccount a {
+        text-decoration: none;
+    
+    }

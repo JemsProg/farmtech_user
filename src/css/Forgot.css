@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+:root {
+    --primary-color : #316109;
+}
+
+.forgot-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+        margin: 0;
+        padding: 0;
+}
+
+.forgot-left{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.forgot-title-container {
+    width: 100%;
+    padding: 20px;
+}   
+
+.forgot-title {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+
+}
+
+.forgot-left-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+
+.forgot-title-container span {
+    color: black;
+}
+
+.forgot-left-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.forgot-left-content h1{
+    font-size: 3rem;
+}
+
+.forgot-left-content p {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color: gray;
+}
+
+.forgot-left-input {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.forgot-left-input input {
+    width: 40%;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;  
+}
+
+.forgot-right {
+    width: 50%;
+    background-image: url('../images/gr.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.forgot-button {
+    width: 40%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: white;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    display: flex;
+}
+
+.forgot-reset-btn {
+        width: 100%;
+        border-radius: 20px;
+        padding: 8px;
+        border: none;
+        background-color: var(--primary-color);
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1rem;
+}
+
+.forgot-right img {
+    height: 100%;
+    object-fit: cover;
+}
+
+.forgot-back-button {
+    font-size: 1rem;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px 10px;
+    width: fit-content;
+    transition: all 0.2s ease;
+}
+
+.forgot-back-button:hover {
+    text-decoration: underline;
+    transform: translateX(-2px);
+}
+
+.forgot-message {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #ff0000; /* Default color for error messages */
+    text-align: center;
+}
+
+.forgot-message.success {
+    color: #28a745; /* Green color for success messages */
+}

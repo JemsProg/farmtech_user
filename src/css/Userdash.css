@@ -1,0 +1,555 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+}
+
+.userdash-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.userdash-topnav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.userdash-topnav-home {
+  background-color: rgb(74, 105, 19);
+  color: white;
+}
+
+.userdash-topnav-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.userdash-topnav-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.userdash-topnav-buttons .userdash-topnav-home {
+  background-color: rgb(74, 105, 19);
+  color: white;
+}
+
+.userdash-topnav-buttons .userdash-topnav-lots:hover,
+.userdash-topnav-buttons .userdash-topnav-guides:hover,
+.userdash-topnav-buttons .userdash-topnav-home:hover {
+  background-color: rgb(74, 105, 19);
+  color: white;
+}
+
+.userdash-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 40px;
+}
+.userdash-recommendation-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.userdash-location {
+  margin: 10px;
+}
+.userdash-location select {
+  padding: 10px 20px;
+  border: none;
+}
+
+.userdash-title {
+  color: #4c6824;
+  margin-bottom: 10px;
+}
+
+.userdash-recommendation-content p {
+  font-weight: lighter;
+}
+
+.userdash-crops-list {
+  max-width: 100%;
+  height: 250px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  overflow-y: scroll;
+  justify-content: flex-start;
+}
+
+.userdash-crop-type {
+  min-width: 150px;
+  background-color: #4c6824;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 90%;
+  border-radius: 20px;
+  margin: 0px 10px;
+}
+
+.userdash-crop-type img {
+  width: 100px;
+  height: 75px;
+  object-fit: cover;
+}
+
+.userdash-crop-type h3 {
+  color: white;
+}
+
+.userdash-crop-type button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+  color: #4c6824;
+  width: 100%;
+  padding: 5px 15px;
+  cursor: pointer;
+}
+
+.userdash-view-data {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.userdash-view-data input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  border: solid 1px gray;
+}
+
+.search input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-weight: lighter;
+}
+
+.userdash-topnav-profile img {
+  height: 40px;
+  border-radius: 100px;
+  width: 40px;
+}
+
+.userdash-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.userdash-dropdown a {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.userdash-topnav-croprecords {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+  color: #4c6824;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.userdash-topnav-croprecords:hover {
+  background-color: rgb(74, 105, 19);
+  color: white;
+}
+.userdash-dropdown a:hover {
+  background-color: #f5f5f5;
+}
+
+.userdash-logo img {
+  width: 100%;
+  height: 50px;
+}
+
+.userdash-weather-content {
+  display: flex;
+  gap: 20px;
+}
+
+.userdash-weather-left {
+  width: 370px;
+  height: 300px;
+  background-color: #aaaaaa;
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.userdash-weather-left p {
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+}
+
+.userdash-weather-info {
+  display: flex;
+  align-items: center;
+}
+
+.userdash-info-text {
+  margin-left: 10px;
+  color: rgb(59, 59, 59);
+}
+
+.userdash-info-text h2 {
+  font-size: 40px;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+
+.userdash-info-text span {
+  font-size: 20px;
+  position: relative;
+  top: -18px;
+  left: -10px;
+}
+
+.userdash-info-text p {
+  font-size: 12px;
+}
+
+.userdash-weather-left img {
+  width: 90px;
+  height: 90px;
+}
+
+.userdash-weather-footer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.userdash-weather-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.userdash-weather-details p {
+  font-weight: 900;
+}
+
+.userdash-weather-details {
+  width: 75px;
+}
+
+.userdash-weather-right {
+  width: 1000px;
+  height: 300px;
+  background-color: #aaaaaa;
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.userdash-weather-right h4 {
+  margin: 5px 0px;
+  font-size: 16px;
+}
+
+.userdash-row-right {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.userdash-right-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.userdash-right-details label {
+  color: rgb(66, 66, 66);
+  font-size: 13px;
+}
+
+.userdash-right-details img {
+  width: 40px;
+}
+
+/* ===== Global Enhancements ===== */
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(to right, #f9f9f9, #f4f7f1);
+}
+
+/* ===== Top Navigation ===== */
+.userdash-topnav {
+  background: linear-gradient(to right, #ffffff, #f5f5f5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e5e5e5;
+  transition: all 0.3s ease;
+}
+
+/* Topnav Buttons */
+.userdash-topnav-buttons button {
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+.userdash-topnav-buttons button:hover {
+  background: linear-gradient(to right, #4c6824, #607d3b);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Crop Records */
+.userdash-topnav-croprecords {
+  background: white;
+  color: #4c6824;
+  border: 2px solid #4c6824;
+}
+
+.userdash-topnav-croprecords:hover {
+  background-color: #4c6824;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* ===== Dropdown ===== */
+.userdash-dropdown {
+  animation: fadeInDown 0.4s ease;
+  border: 1px solid #e0e0e0;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Recommendation Section ===== */
+.userdash-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4c6824;
+}
+
+.userdash-recommendation-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* ===== Crops List ===== */
+.userdash-crops-list {
+  scrollbar-width: thin;
+  scrollbar-color: #4c6824 #e0e0e0;
+}
+
+.userdash-crops-list::-webkit-scrollbar {
+  height: 8px;
+}
+
+.userdash-crops-list::-webkit-scrollbar-thumb {
+  background-color: #4c6824;
+  border-radius: 4px;
+}
+
+.userdash-crop-type {
+  background: linear-gradient(to bottom right, #4c6824, #6a8936);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.userdash-crop-type:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Crop Button */
+.userdash-crop-type button {
+  font-weight: bold;
+  border: 2px solid #4c6824;
+}
+
+.userdash-crop-type button:hover {
+  background-color: #4c6824;
+  color: white;
+  transform: scale(1.03);
+}
+
+/* ===== Weather Section ===== */
+.userdash-weather-left,
+.userdash-weather-right {
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.userdash-weather-left:hover,
+.userdash-weather-right:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+}
+
+.userdash-weather-info img {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ===== Input Fields ===== */
+.userdash-view-data input,
+.userdash-location select,
+.search input {
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #fefefe;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #4c6824;
+  box-shadow: 0 0 0 3px rgba(76, 104, 36, 0.2);
+}
+
+/* ===== Table ===== */
+table {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+th {
+  background-color: #4c6824;
+  color: white;
+  font-weight: 700;
+}
+
+tr:hover {
+  background-color: #f2fbe3;
+}
+
+/* ===== Profile Avatar ===== */
+.userdash-topnav-profile img {
+  transition: transform 0.3s ease;
+}
+
+.userdash-topnav-profile img:hover {
+  transform: scale(1.1);
+}
+
+/* ===== Responsive Tweaks ===== */
+@media (max-width: 1024px) {
+  .userdash-weather-content {
+    flex-direction: column;
+  }
+
+  .userdash-weather-left,
+  .userdash-weather-right {
+    width: 100% !important;
+    height: auto;
+  }
+
+  .userdash-crops-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .userdash-crop-type {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 600px) {
+  .userdash-topnav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .userdash-topnav-buttons {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .userdash-weather-left,
+  .userdash-weather-right {
+    padding: 15px;
+  }
+}
+
+.userdash-charts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}

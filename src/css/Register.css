@@ -1,0 +1,177 @@
+/* ===== Global Styles ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(to right, #f9f9f9, #f4f7f1);
+    color: #333333;
+}
+
+/* ===== Register Container ===== */
+.register-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== Left Section ===== */
+.register-left-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    width: 50%;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.register-left-title {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.register-left-title p {
+    font-size: 1.5rem;
+    color: #4c6824;
+    font-weight: bold;
+}
+
+.register-left-title span {
+    color: #333;
+    font-weight: normal;
+}
+
+.register-left-inputs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    gap: 15px;
+}
+
+.register-left-inputs input,
+.register-left-inputs select {
+    width: 80%;
+    height: 40px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.register-left-inputs input:focus,
+.register-left-inputs select:focus {
+    outline: none;
+    border-color: #4c6824;
+    box-shadow: 0 0 5px rgba(76, 104, 36, 0.3);
+}
+
+.register-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4c6824;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 80%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.register-btn:hover {
+    background-color: #607d3b;
+    transform: scale(1.05);
+}
+
+.register-left-inputs h5 {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.register-left-inputs a {
+    margin-left: 5px;
+    text-decoration: none;
+    color: #4c6824;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.register-left-inputs a:hover {
+    color: #607d3b;
+}
+
+/* ===== Right Section ===== */
+.register-right-container {
+    width: 50%;
+    background-image: url('../images/gr.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.register-right-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: color 316109;
+    z-index: 1;
+}
+
+.register-right-container img {
+    height: 100%;
+    object-fit: cover;
+    border: none;
+    z-index: 2;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+    .register-container {
+        flex-direction: column;
+    }
+
+    .register-left-container,
+    .register-right-container {
+        width: 100%;
+        height: 50vh;
+    }
+
+    .register-left-inputs input,
+    .register-left-inputs select,
+    .register-btn {
+        width: 90%;
+    }
+}
+
+@media (max-width: 768px) {
+    .register-left-title p {
+        font-size: 1.2rem;
+    }
+
+    .register-left-inputs input,
+    .register-left-inputs select {
+        font-size: 0.9rem;
+    }
+
+    .register-btn {
+        font-size: 0.9rem;
+    }
+}

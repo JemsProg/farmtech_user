@@ -1,0 +1,446 @@
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+  --primary-color: #316109;
+  --accent-color: #a4c639;
+  --bg-color: #f9fafb;
+  --border-radius: 12px;
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Layout */
+.lots-container {
+  display: flex;
+  height: 100vh;
+}
+
+.lots-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Monitoring Section */
+.lots-monitoring-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.lots-monitoring-left,
+.lots-monitoring-right {
+  flex: 1;
+  min-width: 300px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.lots-monitoring-left input {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.lots-monitoring-left input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(49, 97, 9, 0.2);
+}
+
+.lots-monitoring-left table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.lots-monitoring-left th,
+.lots-monitoring-left td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lots-monitoring-left th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.lots-monitoring-left button,
+.lots-owned button,
+.lots-add-lot button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  background-color: var(--primary-color);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.lots-monitoring-left button:hover,
+.lots-owned button:hover,
+.lots-add-lot button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.lots-owned {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.lots-add-lot {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Buttons */
+.lots-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+}
+
+.lots-button-create {
+  background-color: #028100;
+}
+
+.lots-button-close {
+  background-color: #dc2626;
+}
+
+/* Modal */
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+}
+
+.modal-content textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-content button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 5px;
+  transition: 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Modal Actions */
+.view-modal-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.view-modal-edit-btn {
+  background-color: hwb(110 9% 56%);
+  color: white;
+}
+
+.view-modal-delete {
+  background-color: hwb(110 9% 56%);
+  color: white;
+}
+
+.view-modal-back {
+  background-color: hwb(110 9% 56%);
+  color: white;
+  position: relative;
+  left: 250px;
+}
+
+.view-modal-apply {
+  background-color: hwb(110 9% 56%);
+  color: white;
+}
+
+.view-modal-done {
+  background-color: hwb(110 9% 56%);
+  color: white;
+}
+
+/* History List */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  background: #f3f4f6;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-here-btn,
+.done-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.view-here-btn:hover,
+.done-btn:hover {
+  background: var(--accent-color);
+}
+
+/* Optional - only if not already styled like this */
+.history-item {
+  background: #f3f4f6;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-info small {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+/* Search Bar */
+.search-bar {
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  width: 30%;
+  font-size: 17px;
+  transition: all 0.2s ease;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(49, 97, 9, 0.2);
+}
+
+/* View Button */
+.lots-monitoring-left button,
+.lots-add-lot button,
+.view-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  background-color: var(--primary-color);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.view-button {
+  background-color: #43a63b; /* Green color for the View button */
+}
+
+.view-button:hover {
+  background-color: #36a420; /* Darker green on hover */
+  transform: translateY(-2px);
+}
+
+/* Modal Styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #43a63b;
+  color: white;
+  font-size: 14px;
+}
+
+.modal-content button:hover {
+  opacity: 0.9;
+}
+
+.lots-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  /* Modal Styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-content button:first-child {
+  background: none;
+  color: purple;
+}
+
+.modal-content button:last-child {
+  background-color: #43a63b;
+  color: white;
+}
+
+.modal-content button:hover {
+  opacity: 0.9;
+}
+
+.lots-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.modal-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-icons button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-icons button:hover {
+  opacity: 0.8;
+}
+}
+
