@@ -63,7 +63,7 @@ export default function Profile() {
                 </div>
               </div>
               <div className="profile-card-right">
-                <h1>Member Since</h1>
+                <h1>Details: </h1>
                 <div className="profile-right-info">
                   <p>{userData.location}</p>
                   <p>{userData.dateOfBirth}</p>

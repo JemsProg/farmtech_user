@@ -13,11 +13,9 @@ import LotsNavbar from "../components/Navbar";
 import "../css/CropRecords.css";
 
 export default function CropRecords() {
-  const [items, setItems] = useState([]);
-  const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("");
-  const [totalHarvested, setTotalHarvested] = useState("");
   const [totalPlanted, setTotalPlanted] = useState("");
+  const [totalHarvested, setTotalHarvested] = useState("");
+  const [totalSpending, setTotalSpending] = useState("");
   const [desiredMargin, setDesiredMargin] = useState("");
 
   const [srp, setSrp] = useState(0);
@@ -29,59 +27,59 @@ export default function CropRecords() {
   const [efficiency, setEfficiency] = useState(0);
   const [chartData, setChartData] = useState([]);
 
-  const totalSpent = items.reduce((acc, item) => acc + item.price, 0);
-
-  const handleAddItem = () => {
-    if (productName && price) {
-      setItems([...items, { name: productName, price: parseFloat(price) }]);
-      setProductName("");
-      setPrice("");
-    }
-  };
-
   const calculateROI = () => {
     const planted = parseFloat(totalPlanted) || 0;
     const harvested = parseFloat(totalHarvested) || 0;
     const margin = parseFloat(desiredMargin) || 0;
+    const spent = parseFloat(totalSpending) || 0;
 
-    if (harvested === 0) return;
+    if (harvested === 0 || spent === 0) {
+      alert("Please enter non-zero values for harvested and spending.");
+      return;
+    }
 
-    const calculatedSrp = (totalSpent / harvested) * (1 + margin / 100);
+    // 1. SRP = total spending × (1 + margin/100) ÷ total harvested
+    const calculatedSrp = (spent * (1 + margin / 100)) / harvested;
+    // 2. Total Earning = SRP × total harvested
     const earnings = calculatedSrp * harvested;
-    const calculatedProfit = earnings - totalSpent;
-    const calculatedRoi = ((earnings - totalSpent) / totalSpent) * 100;
-    const cropLoss = planted - harvested;
-    const lossValue = cropLoss * calculatedSrp;
-    const eff = planted !== 0 ? (harvested / planted) * 100 : 0;
+    // 3. Profit = Total Earning − Total Spending
+    const calculatedProfit = earnings - spent;
+    // 4. ROI = (Profit ÷ Total Spending) × 100
+    const calculatedRoi = (calculatedProfit / spent) * 100;
+    // 5. Crop Loss = Total Planted − Total Harvested
+    const lossQty = planted - harvested;
+    // 6. Loss Value = Crop Loss × SRP
+    const lossValue = lossQty * calculatedSrp;
+    // 7. Harvest Efficiency = (Total Harvested ÷ Total Planted) × 100
+    const eff = planted > 0 ? (harvested / planted) * 100 : 0;
 
     setSrp(calculatedSrp);
     setTotalEarnings(earnings);
     setProfit(calculatedProfit);
     setRoi(calculatedRoi);
-    setCropLossQty(cropLoss);
+    setCropLossQty(lossQty);
     setCropLossValue(lossValue);
     setEfficiency(eff);
 
-    // generate chart points
-    const points = [];
+    // generate chart points around SRP ±20%
+    const pts = [];
     const min = calculatedSrp * 0.8;
     const max = calculatedSrp * 1.2;
     const step = (max - min) / 10;
     for (let s = min; s <= max; s += step) {
-      const pointEarnings = s * harvested;
-      const pointRoi = ((pointEarnings - totalSpent) / totalSpent) * 100;
-      points.push({
+      const ptEarnings = s * harvested;
+      const ptRoi = ((ptEarnings - spent) / spent) * 100;
+      pts.push({
         sales: parseFloat(s.toFixed(2)),
-        roi: parseFloat(pointRoi.toFixed(2)),
+        roi: parseFloat(ptRoi.toFixed(2)),
       });
     }
-    setChartData(points);
+    setChartData(pts);
   };
 
   return (
     <div className="crop-records-container">
       <LotsNavbar />
-
       <div className="crop-records-content">
         <h2>Crop Records</h2>
         <div className="crop-records-sections">
@@ -107,56 +105,37 @@ export default function CropRecords() {
 
           {/* Calculator Section */}
           <div className="calc-section">
-            <div className="calc-inputs">
-              <label>Product Name</label>
-              <input
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-              />
-
-              <label>Price</label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-              <button className="add-btn" onClick={handleAddItem}>
-                +
-              </button>
-            </div>
-
-            <div className="calc-spent-box">
-              <h4>Items</h4>
-              <ul>
-                {items.map((item, idx) => (
-                  <li key={idx}>
-                    {item.name} - ₱ {item.price.toLocaleString()}
-                  </li>
-                ))}
-              </ul>
-              <p className="total-spent">
-                Total Spent: ₱ {totalSpent.toLocaleString()}
-              </p>
-            </div>
-
             <div className="calc-other-inputs">
               <label>Total Crop Planted</label>
               <input
                 type="number"
                 value={totalPlanted}
                 onChange={(e) => setTotalPlanted(e.target.value)}
+                placeholder="e.g. 1000"
               />
+
               <label>Total Crop Harvested</label>
               <input
                 type="number"
                 value={totalHarvested}
                 onChange={(e) => setTotalHarvested(e.target.value)}
+                placeholder="e.g. 850"
               />
+
+              <label>Total Spending (₱)</label>
+              <input
+                type="number"
+                value={totalSpending}
+                onChange={(e) => setTotalSpending(e.target.value)}
+                placeholder="e.g. 50000"
+              />
+
               <label>Desired Profit Margin (%)</label>
               <input
                 type="number"
                 value={desiredMargin}
                 onChange={(e) => setDesiredMargin(e.target.value)}
+                placeholder="e.g. 20"
               />
             </div>
 
@@ -169,7 +148,9 @@ export default function CropRecords() {
               <h4>Summary</h4>
               <p>Suggested Retail Price (SRP): ₱{srp.toFixed(2)}</p>
               <p>Total Earnings: ₱{totalEarnings.toFixed(2)}</p>
-              <p>Total Spending: ₱{totalSpent.toFixed(2)}</p>
+              <p>
+                Total Spending: ₱{parseFloat(totalSpending || 0).toFixed(2)}
+              </p>
               <p>Profit: ₱{profit.toFixed(2)}</p>
               <p>ROI: {roi.toFixed(2)}%</p>
               <p>Crop Loss: {cropLossQty.toFixed(2)} units</p>

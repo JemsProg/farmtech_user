@@ -1,151 +1,187 @@
 .guides-container {
-    display: flex;
+  display: flex;
   height: 100vh;
 }
 
 .guides-content {
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    flex: 1;
-    overflow-y: auto;
-    background-color: rgb(239, 239, 239);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  flex: 1;
+  overflow-y: auto;
+  background-color: rgb(239, 239, 239);
 }
 
 .guides-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    height: 100%;
-    padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 20px;
 }
 
 .guides-cards-list {
-    display: flex;
-    margin-top: 20px;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  margin-top: 20px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .guides-card {
-    height: 355px;
-    width: 275px;   
-    border: none;
-    border-radius: 20px;
-    background-color: white;
-}
-
-.guides-card img{
-   width: 220px;
-   height: 150px;
-   object-fit: contain;
-}
-
-.guides-card-image {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-weight: bolder;
-}
-
-.guides-card-desc  {
-    max-height: 500px;
-    padding: 10px;
-    text-align: justify;
-    overflow-y: scroll;
-}
-
-.guides-card-button button {
-    background-color: hwb(110 9% 56%);
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.guides-container {
-    display: flex;
-    height: 100vh;
-}
-
-.guides-content {
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    flex: 1;
-    overflow-y: auto;
-    background-color: rgb(239, 239, 239);
-}
-
-.guides-cards-list {
-    display: flex;
-    margin-top: 20px;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.guides-card {
-    height: 355px;
-    width: 275px;   
-    border: none;
-    border-radius: 20px;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px;
+  height: 355px;
+  width: 275px;
+  border: none;
+  border-radius: 20px;
+  background-color: white;
 }
 
 .guides-card img {
-    width: 300px;
-    height: 150px;
-    object-fit: contain;
-    border-radius: 10px;
+  width: 220px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.guides-card-image {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bolder;
+}
+
+.guides-card-desc {
+  max-height: 500px;
+  padding: 10px;
+  text-align: justify;
+  overflow-y: scroll;
+}
+
+.guides-card-button button {
+  background-color: hwb(110 9% 56%);
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.guides-container {
+  display: flex;
+  height: 100vh;
+}
+
+.guides-content {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  flex: 1;
+  overflow-y: auto;
+  background-color: rgb(239, 239, 239);
+}
+
+.guides-cards-list {
+  display: flex;
+  margin-top: 20px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.guides-card {
+  height: 355px;
+  width: 275px;
+  border: none;
+  border-radius: 20px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.guides-card img {
+  width: 300px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 10px;
 }
 
 .guides-card h4 {
-    margin: 10px 0;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .guides-card-button {
-    background-color: hwb(110 9% 56%);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
+  background-color: hwb(110 9% 56%);
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
 }
 .crop-name {
-    font-size: 18px; /* Adjust the size as needed */
-    font-weight: bold;
-    color: #333; /* Change the color as needed */
-    text-align: center;
-    display: block;
-    margin-top: 10px;
+  font-size: 18px; /* Adjust the size as needed */
+  font-weight: bold;
+  color: #333; /* Change the color as needed */
+  text-align: center;
+  display: block;
+  margin-top: 10px;
 }
 
 .crop-image {
-    width: 220px; /* Adjust the width as needed */
-    height: 150px; /* Adjust the height as needed */
-    object-fit: cover; /* Ensures the image fits nicely */
-    border-radius: 10px; /* Adds rounded corners */
-    margin-bottom: 10px; /* Adds spacing below the image */
+  width: 220px; /* Adjust the width as needed */
+  height: 150px; /* Adjust the height as needed */
+  object-fit: cover; /* Ensures the image fits nicely */
+  border-radius: 10px; /* Adds rounded corners */
+  margin-bottom: 10px; /* Adds spacing below the image */
+}
+
+/* for modal */
+/* Guides.css */
+
+.modal {
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
+  background: rgba(0, 0, 0, 0.5); /* dim the background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  width: 90%; /* take up 90% of viewport width */
+  max-width: 1000px; /* but no wider than 1000px */
+  max-height: 90vh; /* leave a bit of space top & bottom */
+  overflow-y: auto; /* scroll internally if content is tall */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Close button tweaks */
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }

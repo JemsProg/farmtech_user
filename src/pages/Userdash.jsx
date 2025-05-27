@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "../css/Userdash.css";
-import tomato from "../images/tomato.jpg";
-import garlic from "../images/garlic.jpg";
-import bitter from "../images/bitter.jpg";
-import cabbage from "../images/cabbage.jpg";
-import kalabasa from "../images/kalabasa.jpg";
-import mustasa from "../images/mustasa.jpg";
 import weather from "../images/cloudy.png";
 import Navbar from "../components/Navbar";
 
 // firebase config
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+
 import { db } from "../firebase.js";
 
 import {
@@ -43,26 +45,205 @@ export default function UserDash() {
   const [forecastData, setForecastData] = useState([]);
   const [recommendedCrops, setRecommendedCrops] = useState([]);
   const [cropsFromDB, setCropsFromDB] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [currentWeather, setCurrentWeather] = useState(null);
+
+  const locationSoilData = {
+    Alfonso: {
+      N: [44.6, 49.6],
+      P: [19.2, 29.2],
+      K: [91.3, 121.3],
+      pH: [5.9, 6.5],
+    },
+    Amadeo: {
+      N: [44.2, 49.2],
+      P: [17.9, 27.9],
+      K: [111.7, 141.7],
+      pH: [5.5, 6.1],
+    },
+    Bacoor: {
+      N: [51.1, 56.1],
+      P: [15.9, 25.9],
+      K: [76.0, 106.0],
+      pH: [5.9, 6.5],
+    },
+    Carmona: {
+      N: [46.3, 51.3],
+      P: [17.2, 27.2],
+      K: [102.5, 132.5],
+      pH: [5.9, 6.5],
+    },
+    "Cavite City": {
+      N: [44.4, 49.4],
+      P: [22.6, 32.6],
+      K: [110.8, 140.8],
+      pH: [5.8, 6.4],
+    },
+    Dasmariñas: {
+      N: [44.6, 49.6],
+      P: [20.3, 30.3],
+      K: [123.2, 153.2],
+      pH: [5.7, 6.3],
+    },
+    "General Emilio Aguinaldo": {
+      N: [43.0, 48.0],
+      P: [22.1, 32.1],
+      K: [124.6, 154.6],
+      pH: [5.7, 6.3],
+    },
+    "General Mariano Alvarez": {
+      N: [45.4, 50.4],
+      P: [22.7, 32.7],
+      K: [78.8, 108.8],
+      pH: [6.4, 7.0],
+    },
+    "General Trias": {
+      N: [51.1, 56.1],
+      P: [26.9, 36.9],
+      K: [95.0, 125.0],
+      pH: [5.8, 6.4],
+    },
+    Imus: {
+      N: [42.5, 47.5],
+      P: [20.3, 30.3],
+      K: [87.3, 117.3],
+      pH: [5.3, 5.9],
+    },
+    Indang: {
+      N: [44.7, 49.7],
+      P: [24.1, 34.1],
+      K: [109.4, 139.4],
+      pH: [6.4, 7.0],
+    },
+    Kawit: {
+      N: [43.3, 48.3],
+      P: [19.1, 29.1],
+      K: [119.5, 149.5],
+      pH: [6.1, 6.7],
+    },
+    Magallanes: {
+      N: [45.6, 50.6],
+      P: [22.0, 32.0],
+      K: [117.2, 147.2],
+      pH: [5.3, 5.9],
+    },
+    Maragondon: {
+      N: [51.2, 56.2],
+      P: [29.6, 39.6],
+      K: [96.5, 126.5],
+      pH: [5.3, 5.9],
+    },
+    Mendez: {
+      N: [45.5, 50.5],
+      P: [29.9, 39.9],
+      K: [110.2, 140.2],
+      pH: [5.3, 5.9],
+    },
+    Naic: {
+      N: [43.5, 48.5],
+      P: [20.2, 30.2],
+      K: [116.9, 146.9],
+      pH: [6.1, 6.7],
+    },
+    Noveleta: {
+      N: [46.2, 51.2],
+      P: [19.0, 29.0],
+      K: [83.6, 113.6],
+      pH: [5.9, 6.5],
+    },
+    Rosario: {
+      N: [43.5, 48.5],
+      P: [22.7, 32.7],
+      K: [110.1, 140.1],
+      pH: [5.6, 6.2],
+    },
+    Silang: {
+      N: [45.4, 50.4],
+      P: [21.2, 31.2],
+      K: [96.5, 126.5],
+      pH: [6.2, 6.8],
+    },
+    Tagaytay: {
+      N: [44.6, 49.6],
+      P: [18.2, 28.2],
+      K: [77.7, 107.7],
+      pH: [6.5, 7.1],
+    },
+    Tanza: {
+      N: [42.7, 47.7],
+      P: [25.7, 35.7],
+      K: [114.2, 144.2],
+      pH: [5.6, 6.2],
+    },
+    Ternate: {
+      N: [50.2, 55.2],
+      P: [15.8, 25.8],
+      K: [109.0, 139.0],
+      pH: [5.4, 6.0],
+    },
+    "Trece Martires": {
+      N: [47.8, 52.8],
+      P: [18.6, 28.6],
+      K: [120.0, 150.0],
+      pH: [5.4, 6.0],
+    },
+    Owase: {
+      N: [42.5, 47.5],
+      P: [25.4, 35.4],
+      K: [93.5, 123.5],
+      pH: [5.4, 6.0],
+    },
+  };
+
+  useEffect(() => {
+    const uid = localStorage.getItem("user_uid");
+    console.log(uid);
+    if (!uid) return;
+
+    const fetchUserLocation = async () => {
+      try {
+        const ref = doc(db, "users", uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const user = snap.data();
+          if (user.location) {
+            setSelectedLocation(user.location);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user location:", error);
+      }
+    };
+
+    fetchUserLocation();
+  }, []);
 
   useEffect(() => {
     const fetchForecast = async () => {
       const lat = 14.5995;
       const lon = 120.9842;
       const apiKey = "50474bb45c7fbb1a8406456faa2dab7a";
-      const cnt = 10;
 
       try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=${cnt}&appid=${apiKey}&units=metric`
+        // 1. Fetch 10-day forecast
+        const forecastRes = await fetch(
+          `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=10&appid=${apiKey}&units=metric`
         );
-        const data = await response.json();
-        if (data && data.list) {
-          setForecastData(data.list);
-        } else {
-          console.error("Invalid forecast response", data);
+        const forecastData = await forecastRes.json();
+        if (forecastData?.list) {
+          setForecastData(forecastData.list);
+        }
+
+        // 2. Fetch current weather
+        const currentRes = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+        );
+        const currentData = await currentRes.json();
+        if (currentData) {
+          setCurrentWeather(currentData);
         }
       } catch (error) {
-        console.error("Error fetching forecast:", error);
+        console.error("Error fetching weather:", error);
       }
     };
 
@@ -80,30 +261,68 @@ export default function UserDash() {
     }
   };
 
+  const inRange = (value, [min, max]) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return false;
+
+    const rangeWidth = max - min;
+    const softMin = min - rangeWidth * 0.3; // Allow 30% below
+    const softMax = max + rangeWidth * 0.3; // Allow 30% above
+
+    return num >= softMin && num <= softMax;
+  };
+
   const matchRecommendedCrops = () => {
     const todayWeather = forecastData[0] || {};
     const temperature = todayWeather?.temp?.day ?? 30;
     const humidity = todayWeather?.humidity ?? 70;
-    const rainfall = 1200; // Replace with sensor or API if available
-    const ph = 6.0; // Replace with real value or sensor
-    const N = 90; // Simulated sensor value
-    const P = 60;
-    const K = 80;
+    const rainfall = todayWeather?.rain ?? 1200;
+
+    const soil = locationSoilData[selectedLocation]; // ← from previous instruction
+    if (!soil) return;
+
+    console.log(selectedLocation);
 
     const matches = cropsFromDB.filter((crop) => {
-      const withinRange = (val, target) => {
-        const num = parseFloat(val);
-        return !isNaN(num) && num >= target - 20 && num <= target + 100;
+      console.log("Checking crop:", crop.label, {
+        N: crop.N,
+        matchN: inRange(crop.N, soil.N),
+        P: crop.P,
+        matchP: inRange(crop.P, soil.P),
+        K: crop.K,
+        matchK: inRange(crop.K, soil.K),
+        pH: crop.ph,
+        matchPH: inRange(crop.ph, soil.pH),
+        temperature: crop.temperature,
+        matchTemp: inRange(crop.temperature, [
+          temperature - 10,
+          temperature + 10,
+        ]),
+        humidity: crop.humidity,
+        matchHumidity: inRange(crop.humidity, [humidity - 10, humidity + 10]),
+        rainfall: crop.rainfall,
+        matchRainfall: inRange(crop.rainfall, [rainfall - 200, rainfall + 200]),
+      });
+
+      const parsedCrop = {
+        ...crop,
+        N: parseFloat(crop.N),
+        P: parseFloat(crop.P),
+        K: parseFloat(crop.K),
+        ph: parseFloat(crop.ph),
+        temperature: parseFloat(crop.temperature),
+        humidity: parseFloat(crop.humidity),
+        rainfall: parseFloat(crop.rainfall),
       };
 
       return (
-        withinRange(crop.N, N) &&
-        withinRange(crop.P, P) &&
-        withinRange(crop.K, K) &&
-        withinRange(crop.temperature, temperature) &&
-        withinRange(crop.humidity, humidity) &&
-        withinRange(crop.rainfall, rainfall) &&
-        withinRange(crop.ph, ph)
+        inRange(crop.N, soil.N) &&
+        inRange(crop.P, soil.P) &&
+        inRange(crop.K, soil.K) &&
+        inRange(crop.ph, soil.pH) &&
+        inRange(parsedCrop.temperature, [temperature - 10, temperature + 10]) &&
+        inRange(parsedCrop.humidity, [humidity - 10, humidity + 10]) &&
+        inRange(parsedCrop.rainfall, [rainfall - 200, rainfall + 200])
       );
     });
 
@@ -111,10 +330,10 @@ export default function UserDash() {
   };
 
   useEffect(() => {
-    if (cropsFromDB.length > 0 && forecastData.length > 0) {
+    if (cropsFromDB.length > 0 && forecastData.length > 0 && selectedLocation) {
       matchRecommendedCrops();
     }
-  }, [cropsFromDB, forecastData]);
+  }, [cropsFromDB, forecastData, selectedLocation]);
 
   const totalKilos = harvestData.reduce((sum, crop) => sum + crop.kilos, 0);
 
@@ -125,7 +344,12 @@ export default function UserDash() {
         <div className="userdash-main-content">
           <h1 className="userdash-title">Dashboard</h1>
           <div className="userdash-location">
-            <select name="location" id="location">
+            <select
+              name="location"
+              id="location"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            >
               <option value="Alfonso">Alfonso</option>
               <option value="Amadeo">Amadeo</option>
               <option value="Bacoor">Bacoor</option>
@@ -168,42 +392,37 @@ export default function UserDash() {
                   <p>Partly Sunny</p>
                 </div>
               </div>
+
               <div className="userdash-weather-footer">
                 <div className="userdash-weather-row">
-                  <div className="userdash-weather-details">
-                    <h5>Air Quality</h5>
-                    <p>33</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>Wind</h5>
-                    <p>3 mph</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>Humidity</h5>
-                    <p>76%</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>Feels like</h5>
-                    <p>48°</p>
-                  </div>
-                </div>
-                <div className="userdash-weather-row">
-                  <div className="userdash-weather-details">
-                    <h5>Visibility</h5>
-                    <p>9.9 mi</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>UV index</h5>
-                    <p>0</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>Pressure</h5>
-                    <p>29.98 in</p>
-                  </div>
-                  <div className="userdash-weather-details">
-                    <h5>Dew point</h5>
-                    <p>43°</p>
-                  </div>
+                  {currentWeather && currentWeather.main && (
+                    <div className="userdash-weather-footer">
+                      <div className="userdash-weather-row">
+                        <div className="userdash-weather-details">
+                          <h5>Wind</h5>
+                          <p>{currentWeather.wind?.speed} m/s</p>
+                        </div>
+                        <div className="userdash-weather-details">
+                          <h5>Humidity</h5>
+                          <p>{currentWeather.main.humidity}%</p>
+                        </div>
+                        <div className="userdash-weather-details">
+                          <h5>Feels like</h5>
+                          <p>{Math.round(currentWeather.main.feels_like)}°C</p>
+                        </div>
+                        <div className="userdash-weather-details">
+                          <h5>Pressure</h5>
+                          <p>{currentWeather.main.pressure} hPa</p>
+                        </div>
+                        <div className="userdash-weather-details">
+                          <h5>Visibility</h5>
+                          <p>
+                            {(currentWeather.visibility / 1000).toFixed(1)} km
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
