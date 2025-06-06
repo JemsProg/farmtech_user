@@ -1,9 +1,11 @@
+// src/pages/UserDash.jsx
 import React, { useState, useEffect } from "react";
 import "../css/Userdash.css";
 import weather from "../images/cloudy.png";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
+import { useNavigate } from "react-router-dom";
 
-// firebase config
+// Firebase imports
 import {
   collection,
   getDocs,
@@ -12,9 +14,9 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-
 import { db } from "../firebase.js";
 
+// Recharts imports
 import {
   BarChart,
   Bar,
@@ -40,6 +42,8 @@ const harvestData = [
 const pieColors = ["#4c6824", "#88a453", "#c8d6af", "#f4e285", "#f7b05b"];
 
 export default function UserDash() {
+  const navigate = useNavigate();
+
   const [showModal, setShowModal] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [forecastData, setForecastData] = useState([]);
@@ -48,6 +52,7 @@ export default function UserDash() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [currentWeather, setCurrentWeather] = useState(null);
 
+  // Soil ranges by location (unchanged)
   const locationSoilData = {
     Alfonso: {
       N: [44.6, 49.6],
@@ -195,11 +200,18 @@ export default function UserDash() {
     },
   };
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 1) Check localStorage for user_uid → if missing, redirect to “/”
+  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const uid = localStorage.getItem("user_uid");
-    console.log(uid);
-    if (!uid) return;
+    if (!uid) {
+      // no UID: force redirect to landing
+      navigate("/", { replace: true });
+      return; // skip the rest of this effect
+    }
 
+    // Once we know UID exists, fetch that user’s location
     const fetchUserLocation = async () => {
       try {
         const ref = doc(db, "users", uid);
@@ -216,31 +228,35 @@ export default function UserDash() {
     };
 
     fetchUserLocation();
-  }, []);
+  }, [navigate]);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 2) Fetch forecast & current weather (unchanged)
+  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchForecast = async () => {
+      // (hard‐coded coordinates; feel free to replace with dynamic lat/lon)
       const lat = 14.5995;
       const lon = 120.9842;
       const apiKey = "50474bb45c7fbb1a8406456faa2dab7a";
 
       try {
-        // 1. Fetch 10-day forecast
+        // 1. Fetch 10‐day forecast
         const forecastRes = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=10&appid=${apiKey}&units=metric`
         );
-        const forecastData = await forecastRes.json();
-        if (forecastData?.list) {
-          setForecastData(forecastData.list);
+        const forecastJson = await forecastRes.json();
+        if (forecastJson?.list) {
+          setForecastData(forecastJson.list);
         }
 
         // 2. Fetch current weather
         const currentRes = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
-        const currentData = await currentRes.json();
-        if (currentData) {
-          setCurrentWeather(currentData);
+        const currentJson = await currentRes.json();
+        if (currentJson) {
+          setCurrentWeather(currentJson);
         }
       } catch (error) {
         console.error("Error fetching weather:", error);
@@ -251,59 +267,45 @@ export default function UserDash() {
     fetchCropsFromDatabase();
   }, []);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 3) Load all “cavite_crops” from Firestore
+  // ─────────────────────────────────────────────────────────────────────────────
   const fetchCropsFromDatabase = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "cavite_crops"));
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const snap = await getDocs(collection(db, "cavite_crops"));
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setCropsFromDB(data);
     } catch (error) {
       console.error("Failed to fetch crops:", error);
     }
   };
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 4) Utility: “inRange” allowing 30% padding around each min/max
+  // ─────────────────────────────────────────────────────────────────────────────
   const inRange = (value, [min, max]) => {
     const num = parseFloat(value);
     if (isNaN(num)) return false;
-
     const rangeWidth = max - min;
-    const softMin = min - rangeWidth * 0.3; // Allow 30% below
-    const softMax = max + rangeWidth * 0.3; // Allow 30% above
-
+    const softMin = min - rangeWidth * 0.3; // 30% below
+    const softMax = max + rangeWidth * 0.3; // 30% above
     return num >= softMin && num <= softMax;
   };
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 5) Match recommended crops whenever we have:
+  //    • cropsFromDB  • forecastData  • selectedLocation
+  // ─────────────────────────────────────────────────────────────────────────────
   const matchRecommendedCrops = () => {
     const todayWeather = forecastData[0] || {};
     const temperature = todayWeather?.temp?.day ?? 30;
     const humidity = todayWeather?.humidity ?? 70;
     const rainfall = todayWeather?.rain ?? 1200;
-
-    const soil = locationSoilData[selectedLocation]; // ← from previous instruction
+    const soil = locationSoilData[selectedLocation];
     if (!soil) return;
 
-    console.log(selectedLocation);
-
     const matches = cropsFromDB.filter((crop) => {
-      console.log("Checking crop:", crop.label, {
-        N: crop.N,
-        matchN: inRange(crop.N, soil.N),
-        P: crop.P,
-        matchP: inRange(crop.P, soil.P),
-        K: crop.K,
-        matchK: inRange(crop.K, soil.K),
-        pH: crop.ph,
-        matchPH: inRange(crop.ph, soil.pH),
-        temperature: crop.temperature,
-        matchTemp: inRange(crop.temperature, [
-          temperature - 10,
-          temperature + 10,
-        ]),
-        humidity: crop.humidity,
-        matchHumidity: inRange(crop.humidity, [humidity - 10, humidity + 10]),
-        rainfall: crop.rainfall,
-        matchRainfall: inRange(crop.rainfall, [rainfall - 200, rainfall + 200]),
-      });
-
+      // Convert Firestore strings to floats
       const parsedCrop = {
         ...crop,
         N: parseFloat(crop.N),
@@ -316,10 +318,10 @@ export default function UserDash() {
       };
 
       return (
-        inRange(crop.N, soil.N) &&
-        inRange(crop.P, soil.P) &&
-        inRange(crop.K, soil.K) &&
-        inRange(crop.ph, soil.pH) &&
+        inRange(parsedCrop.N, soil.N) &&
+        inRange(parsedCrop.P, soil.P) &&
+        inRange(parsedCrop.K, soil.K) &&
+        inRange(parsedCrop.ph, soil.pH) &&
         inRange(parsedCrop.temperature, [temperature - 10, temperature + 10]) &&
         inRange(parsedCrop.humidity, [humidity - 10, humidity + 10]) &&
         inRange(parsedCrop.rainfall, [rainfall - 200, rainfall + 200])
@@ -335,14 +337,22 @@ export default function UserDash() {
     }
   }, [cropsFromDB, forecastData, selectedLocation]);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 6) Summarize total kilos from harvestData
+  // ─────────────────────────────────────────────────────────────────────────────
   const totalKilos = harvestData.reduce((sum, crop) => sum + crop.kilos, 0);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 7) Render
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <>
       <div className="userdash-layout">
         <Navbar />
         <div className="userdash-main-content">
           <h1 className="userdash-title">Dashboard</h1>
+
+          {/* SELECT LOCATION */}
           <div className="userdash-location">
             <select
               name="location"
@@ -350,6 +360,7 @@ export default function UserDash() {
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
+              <option value="">Choose Location</option>
               <option value="Alfonso">Alfonso</option>
               <option value="Amadeo">Amadeo</option>
               <option value="Bacoor">Bacoor</option>
@@ -380,55 +391,57 @@ export default function UserDash() {
             </select>
           </div>
 
+          {/* WEATHER SUMMARY */}
           <div className="userdash-weather-content">
             <div className="userdash-weather-left">
               <p>Current Weather</p>
               <div className="userdash-weather-info">
-                <img src={weather} alt="" />
+                <img src={weather} alt="Weather Icon" />
                 <div className="userdash-info-text">
                   <h2>
-                    33 <span>°C</span>
+                    {currentWeather
+                      ? Math.round(currentWeather.main.temp)
+                      : "--"}{" "}
+                    <span>°C</span>
                   </h2>
-                  <p>Partly Sunny</p>
+                  <p>
+                    {currentWeather
+                      ? currentWeather.weather[0].description
+                      : "Loading…"}
+                  </p>
                 </div>
               </div>
 
-              <div className="userdash-weather-footer">
-                <div className="userdash-weather-row">
-                  {currentWeather && currentWeather.main && (
-                    <div className="userdash-weather-footer">
-                      <div className="userdash-weather-row">
-                        <div className="userdash-weather-details">
-                          <h5>Wind</h5>
-                          <p>{currentWeather.wind?.speed} m/s</p>
-                        </div>
-                        <div className="userdash-weather-details">
-                          <h5>Humidity</h5>
-                          <p>{currentWeather.main.humidity}%</p>
-                        </div>
-                        <div className="userdash-weather-details">
-                          <h5>Feels like</h5>
-                          <p>{Math.round(currentWeather.main.feels_like)}°C</p>
-                        </div>
-                        <div className="userdash-weather-details">
-                          <h5>Pressure</h5>
-                          <p>{currentWeather.main.pressure} hPa</p>
-                        </div>
-                        <div className="userdash-weather-details">
-                          <h5>Visibility</h5>
-                          <p>
-                            {(currentWeather.visibility / 1000).toFixed(1)} km
-                          </p>
-                        </div>
-                      </div>
+              {currentWeather && currentWeather.main && (
+                <div className="userdash-weather-footer">
+                  <div className="userdash-weather-row">
+                    <div className="userdash-weather-details">
+                      <h5>Wind</h5>
+                      <p>{currentWeather.wind?.speed} m/s</p>
                     </div>
-                  )}
+                    <div className="userdash-weather-details">
+                      <h5>Humidity</h5>
+                      <p>{currentWeather.main.humidity}%</p>
+                    </div>
+                    <div className="userdash-weather-details">
+                      <h5>Feels like</h5>
+                      <p>{Math.round(currentWeather.main.feels_like)}°C</p>
+                    </div>
+                    <div className="userdash-weather-details">
+                      <h5>Pressure</h5>
+                      <p>{currentWeather.main.pressure} hPa</p>
+                    </div>
+                    <div className="userdash-weather-details">
+                      <h5>Visibility</h5>
+                      <p>{(currentWeather.visibility / 1000).toFixed(1)} km</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="userdash-weather-right">
-              <h3>10-day Weather Forecast</h3>
+              <h3>10-day Forecast</h3>
               <h4>Day</h4>
               <div className="userdash-row-right">
                 {forecastData.map((day, index) => {
@@ -479,6 +492,7 @@ export default function UserDash() {
             </div>
           </div>
 
+          {/* CROP RECOMMENDATIONS */}
           <div className="userdash-recommendation-content">
             <h2>Recommendation</h2>
             <p>
@@ -490,7 +504,11 @@ export default function UserDash() {
             ) : (
               <div
                 className="userdash-crops-list"
-                style={{ gap: "20px", flexWrap: "wrap", display: "flex" }}
+                style={{
+                  gap: "20px",
+                  flexWrap: "wrap",
+                  display: "flex",
+                }}
               >
                 {recommendedCrops.map((crop, index) => (
                   <div
@@ -513,7 +531,10 @@ export default function UserDash() {
           </div>
         </div>
       </div>
+
+      {/* CHARTS SECTION */}
       <div className="userdash-charts" style={{ display: "flex", gap: "40px" }}>
+        {/* Total Harvested Bar Chart */}
         <div
           style={{
             flex: 1,
@@ -548,6 +569,7 @@ export default function UserDash() {
           </ResponsiveContainer>
         </div>
 
+        {/* Top 5 Harvested Pie Chart */}
         <div
           style={{
             flex: 1,
@@ -586,6 +608,7 @@ export default function UserDash() {
         </div>
       </div>
 
+      {/* OPTIONAL: If you ever open showModal, here's a sample modal layout */}
       {showModal && selectedCrop && (
         <div
           style={{
@@ -628,10 +651,10 @@ export default function UserDash() {
             <h3 style={{ fontSize: "20px", marginBottom: "10px" }}>
               <strong>{selectedCrop.name}</strong> ({selectedCrop.type})
             </h3>
-            <p style={{ fontWeight: "bold" }}>Best Time/ Season to plant:</p>
+            <p style={{ fontWeight: "bold" }}>Best Season to Plant:</p>
             <p style={{ marginBottom: "20px" }}>{selectedCrop.season}</p>
             <button
-              onClick={handleCloseModal}
+              onClick={() => setShowModal(false)}
               style={{
                 padding: "10px 20px",
                 backgroundColor: "#4c6824",
@@ -648,6 +671,7 @@ export default function UserDash() {
         </div>
       )}
 
+      {/* INLINE ANIMATIONS */}
       <style>
         {`
           .userdash-layout {

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import GuidesNavbar from "../components/Navbar.jsx";
 import GuidesCard from "../components/GuidesCard";
 import "../css/Guides.css";
@@ -7,6 +9,19 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase.js";
 
 export default function Guides() {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const uid = localStorage.getItem("user_uid");
+    if (!uid) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setUserId(uid);
+  }, [navigate]);
+
   const [guides, setGuides] = useState([]);
   const [selectedGuide, setSelectedGuide] = useState(null);
 

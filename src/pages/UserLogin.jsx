@@ -1,5 +1,5 @@
 // src/pages/UserLogin.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/UserLogin.css";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -19,6 +19,14 @@ export default function UserLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If a farmer is already logged in (user_uid in localStorage), redirect to dashboard
+    const uid = localStorage.getItem("user_uid");
+    if (uid) {
+      navigate("/userdash", { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

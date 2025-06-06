@@ -3,7 +3,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* in src/index.css (or your global CSS) */
+.swal2-container {
+  z-index: 9999 !important;
+}
+.swal2-popup {
+  z-index: 9999 !important;
 }
 
 :root {
@@ -343,7 +351,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   animation: fadeInUp 0.3s ease;
 }
 
@@ -374,7 +382,6 @@ body {
   font-weight: 600;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-
 
 .modal-content button:hover {
   background-color: #388d32;
@@ -431,5 +438,3 @@ body {
     transform: translateY(0);
   }
 }
-
-

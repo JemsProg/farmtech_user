@@ -1,8 +1,10 @@
 // src/pages/Lots.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import "../css/Lots.css";
 import LotsNavbar from "../components/Navbar.jsx";
-import { auth, db } from "../firebase";
+import { db } from "../firebase.js";
 import {
   collection,
   doc,
@@ -17,8 +19,25 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+
+import HarvestModal from "../components/Lots/HarvestModal.jsx";
+
 export default function Lots() {
+  const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const uid = localStorage.getItem("user_uid");
+    if (!uid) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setUserId(uid);
+  }, [navigate]);
+
   const [userProfile, setUserProfile] = useState({
     firstName: "",
     lastName: "",
@@ -28,13 +47,11 @@ export default function Lots() {
   const [filteredLots, setFilteredLots] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal / form state
   const [selectedLot, setSelectedLot] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showHarvestModal, setShowHarvestModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-  // form fields
   const [newLot, setNewLot] = useState({
     lotName: "",
     cropType: "",
@@ -42,41 +59,49 @@ export default function Lots() {
     cropName: "",
     plantingDate: "",
   });
+
   const [cropTypes, setCropTypes] = useState([]);
+  const [cropSuggestions, setCropSuggestions] = useState([]);
+
   const [newModification, setNewModification] = useState("");
   const [harvestedKilos, setHarvestedKilos] = useState("");
   const [harvestLogs, setHarvestLogs] = useState([]);
 
-  // 1) load userId
   useEffect(() => {
     const uid = localStorage.getItem("user_uid");
     setUserId(uid);
   }, []);
 
-  // 2) fetch user profile (for logging)
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const userSnap = await getDoc(doc(db, "users", userId));
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        setUserProfile({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-        });
+      try {
+        const userSnap = await getDoc(doc(db, "users", userId));
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setUserProfile({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
       }
     })();
   }, [userId]);
 
-  // 3) load crop types
   useEffect(() => {
     (async () => {
-      const snap = await getDocs(collection(db, "crop_type_list"));
-      setCropTypes(snap.docs.map((d) => d.data().crop_type_name));
+      try {
+        const snap = await getDocs(collection(db, "crop_type_list"));
+        const types = snap.docs.map((d) => d.data().crop_type_name);
+        setCropTypes(types);
+      } catch (err) {
+        console.error("Failed to load crop types:", err);
+      }
     })();
   }, []);
 
-  // 4) realtime load lots
   useEffect(() => {
     if (!userId) {
       setLoading(false);
@@ -92,15 +117,34 @@ export default function Lots() {
     return () => unsub();
   }, [userId]);
 
-  // helper: days old
-  function calculateDaysOld(plantingDate) {
-    if (!plantingDate) return 0;
+  useEffect(() => {
+    async function fetchSuggestions() {
+      if (!selectedLot || !selectedLot.cropType) {
+        setCropSuggestions([]);
+        return;
+      }
+      try {
+        const q = query(
+          collection(db, "crop_name"),
+          where("crop_type_name", "==", selectedLot.cropType)
+        );
+        const snap = await getDocs(q);
+        const suggestions = snap.docs.map((d) => d.data().crop_name);
+        setCropSuggestions(suggestions);
+      } catch (err) {
+        console.error("Failed to fetch crop suggestions:", err);
+      }
+    }
+    fetchSuggestions();
+  }, [selectedLot]);
+
+  function calculateDaysOld(plantingDateRaw) {
+    if (!plantingDateRaw) return 0;
     return Math.floor(
-      (Date.now() - new Date(plantingDate)) / (1000 * 60 * 60 * 24)
+      (Date.now() - new Date(plantingDateRaw)) / (1000 * 60 * 60 * 24)
     );
   }
 
-  // Add Lot
   function openAddModal() {
     setShowAddModal(true);
   }
@@ -114,80 +158,156 @@ export default function Lots() {
       plantingDate: "",
     });
   }
+
   async function addLot() {
-    const { lotName, cropType, lotSize, cropName, plantingDate } = newLot;
+    const { lotName, cropType, lotSize } = newLot;
     if (!lotName || !cropType || !lotSize) {
-      return alert("Fill all required fields");
+      return Swal.fire({
+        icon: "warning",
+        title: "Missing Required Fields",
+        text: "Please fill out Lot Name, Crop Type, and Lot Size.",
+      });
     }
     const sizeNum = parseFloat(lotSize);
     if (isNaN(sizeNum) || sizeNum <= 0) {
-      return alert("Invalid lot size");
+      return Swal.fire({
+        icon: "error",
+        title: "Invalid Lot Size",
+        text: "Lot Size must be a positive number.",
+      });
     }
 
     try {
-      // 1. add the lot
-      await addDoc(collection(db, "lots"), {
+      const lotRef = await addDoc(collection(db, "lots"), {
         userId,
         lotName,
         cropType,
         lotSize: sizeNum,
-        cropName: cropName || "",
-        plantingDate: plantingDate || "",
+        cropName: "",
+        plantingDate: "",
         modifications: [],
       });
 
-      // 2. log the action
       await addDoc(collection(db, "farmer_log"), {
         userId,
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
-        activity: `Farmer added new lot of ${sizeNum} m²`,
+        activity: `Farmer added new lot of ${sizeNum} m² (ID: ${lotRef.id})`,
         date: serverTimestamp(),
       });
 
       closeAddModal();
+      Swal.fire({
+        icon: "success",
+        title: "Lot Added",
+        text: `You have successfully added a new lot (“${lotName}”).`,
+      });
     } catch (e) {
       console.error("addLot:", e);
-      alert("Failed to add lot");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Add Lot",
+        text: "There was an error adding your lot. Please try again.",
+      });
     }
   }
 
-  // View / Edit
   function viewLot(lot) {
-    setSelectedLot(lot);
+    setSelectedLot({ ...lot });
   }
   function closeViewModal() {
     setSelectedLot(null);
+    setCropSuggestions([]);
   }
+
   async function saveLotChanges() {
     if (!selectedLot) return;
+
+    let typedName = (selectedLot.cropName || "").trim();
+
+    if (!cropSuggestions.includes(typedName)) {
+      const lowerTyped = typedName.toLowerCase();
+      const matches = cropSuggestions.filter((s) =>
+        s.toLowerCase().startsWith(lowerTyped)
+      );
+      if (matches.length === 1) {
+        typedName = matches[0];
+        setSelectedLot((prev) => ({
+          ...prev,
+          cropName: matches[0],
+        }));
+      } else {
+        return Swal.fire({
+          icon: "warning",
+          title: "Invalid Crop Name",
+          text: `Please choose a valid crop from the suggestions (or type enough letters so only one suggestion remains).`,
+        });
+      }
+    }
+
     try {
       await updateDoc(doc(db, "lots", selectedLot.id), {
-        cropName: selectedLot.cropName,
+        cropName: typedName,
         plantingDate: selectedLot.plantingDate,
         modifications: selectedLot.modifications || [],
       });
-      alert("Saved changes");
+      Swal.fire({
+        icon: "success",
+        title: "Saved",
+        text: `Lot updated: Crop Name set to “${typedName}”.`,
+      });
       closeViewModal();
     } catch (e) {
       console.error("saveLotChanges:", e);
-      alert("Failed to save changes");
-    }
-  }
-  async function deleteLot() {
-    if (!window.confirm("Delete this lot?")) return;
-    try {
-      await deleteDoc(doc(db, "lots", selectedLot.id));
-      closeViewModal();
-    } catch (e) {
-      console.error("deleteLot:", e);
-      alert("Delete failed");
+      Swal.fire({
+        icon: "error",
+        title: "Save Failed",
+        text: "Unable to save your changes. Please try again.",
+      });
     }
   }
 
-  // Modifications
+  async function deleteLot() {
+    if (
+      !(
+        await Swal.fire({
+          title: "Delete Lot?",
+          text: `Are you sure you want to delete “${selectedLot.lotName}”?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, delete",
+        })
+      ).isConfirmed
+    ) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "lots", selectedLot.id));
+      closeViewModal();
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "The lot has been deleted.",
+      });
+    } catch (e) {
+      console.error("deleteLot:", e);
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: "Unable to delete the lot. Please try again.",
+      });
+    }
+  }
+
   async function addModification() {
-    if (!newModification.trim()) return alert("Enter a modification");
+    if (!newModification.trim()) {
+      return Swal.fire({
+        icon: "warning",
+        title: "No Modification Entered",
+        text: "Please type a modification before clicking Add.",
+      });
+    }
     const updated = [...(selectedLot.modifications || []), newModification];
     try {
       await updateDoc(doc(db, "lots", selectedLot.id), {
@@ -195,29 +315,35 @@ export default function Lots() {
       });
       setSelectedLot((p) => ({ ...p, modifications: updated }));
       setNewModification("");
+      Swal.fire({
+        icon: "success",
+        title: "Modification Added",
+        text: "Your modification has been saved.",
+      });
     } catch (e) {
       console.error("addModification:", e);
-      alert("Failed to add modification");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Add Modification",
+        text: "Unable to add your modification. Please try again.",
+      });
     }
   }
 
-  // Harvest
-  function openHarvestModal() {
-    setShowHarvestModal(true);
-  }
-  function closeHarvestModal() {
-    setShowHarvestModal(false);
-    setHarvestedKilos("");
-  }
   async function handleHarvestSubmit() {
     const kilos = parseFloat(harvestedKilos);
-    if (isNaN(kilos) || kilos <= 0) return alert("Invalid kilos");
+    if (isNaN(kilos) || kilos <= 0) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Invalid Kilos",
+        text: "Please enter a positive number for harvested kilos.",
+      });
+    }
     const daysOld = selectedLot.plantingDate
       ? calculateDaysOld(selectedLot.plantingDate)
       : 0;
 
     try {
-      // 1. record harvest
       await addDoc(collection(db, "harvested_crops"), {
         userId,
         lotId: selectedLot.id,
@@ -232,24 +358,39 @@ export default function Lots() {
         modifications: selectedLot.modifications || [],
       });
 
-      // 2. log the action
       await addDoc(collection(db, "farmer_log"), {
         userId,
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
-        activity: `Farmer harvested a crop of ${kilos} kg`,
+        activity: `Farmer harvested a crop of ${kilos} kg (Lot ID: ${selectedLot.id})`,
         date: serverTimestamp(),
       });
 
-      closeHarvestModal();
-      closeViewModal();
+      await updateDoc(doc(db, "lots", selectedLot.id), {
+        cropName: "",
+        plantingDate: "",
+        modifications: [],
+      });
+
+      setHarvestedKilos("");
+      setShowHarvestModal(false);
+      setSelectedLot(null);
+
+      Swal.fire({
+        icon: "success",
+        title: "Harvest Recorded",
+        text: `You recorded a harvest of ${kilos} kg.`,
+      });
     } catch (e) {
       console.error("handleHarvestSubmit:", e);
-      alert("Failed to record harvest");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Record Harvest",
+        text: "Please try again.",
+      });
     }
   }
 
-  // History
   async function viewHistory() {
     try {
       const q = query(
@@ -261,7 +402,11 @@ export default function Lots() {
       setShowHistoryModal(true);
     } catch (e) {
       console.error("viewHistory:", e);
-      alert("Failed to load history");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Load History",
+        text: "Please try again.",
+      });
     }
   }
 
@@ -271,8 +416,10 @@ export default function Lots() {
     <>
       <div className="lots-container">
         <LotsNavbar />
+
         <div className="lots-content">
           <h2>Crop Monitoring</h2>
+
           <input
             className="search-bar"
             placeholder="Enter Lot Name"
@@ -283,6 +430,7 @@ export default function Lots() {
               );
             }}
           />
+
           <div className="lots-monitoring-content">
             <table>
               <thead>
@@ -309,46 +457,50 @@ export default function Lots() {
               </tbody>
             </table>
           </div>
+
           <div className="lots-add-lot">
             <button onClick={openAddModal}>Add Lot</button>
           </div>
         </div>
       </div>
 
-      {/* ——— Add Lot Modal ——— */}
       {showAddModal && (
         <div className="modal">
           <div className="modal-content">
             <h3>Add a New Lot</h3>
+
             <input
               type="text"
               placeholder="Enter lot name"
               value={newLot.lotName}
               onChange={(e) =>
-                setNewLot((n) => ({ ...n, lotName: e.target.value }))
+                setNewLot((prev) => ({ ...prev, lotName: e.target.value }))
               }
             />
+
             <select
               value={newLot.cropType}
               onChange={(e) =>
-                setNewLot((n) => ({ ...n, cropType: e.target.value }))
+                setNewLot((prev) => ({ ...prev, cropType: e.target.value }))
               }
             >
               <option value="">Select Crop Type</option>
-              {cropTypes.map((t, i) => (
-                <option key={i} value={t}>
+              {cropTypes.map((t, idx) => (
+                <option key={idx} value={t}>
                   {t}
                 </option>
               ))}
             </select>
+
             <input
               type="text"
               placeholder="Enter lot size (m²)"
               value={newLot.lotSize}
               onChange={(e) =>
-                setNewLot((n) => ({ ...n, lotSize: e.target.value }))
+                setNewLot((prev) => ({ ...prev, lotSize: e.target.value }))
               }
             />
+
             <div className="lots-buttons">
               <button onClick={addLot}>Create</button>
               <button onClick={closeAddModal}>Cancel</button>
@@ -357,11 +509,11 @@ export default function Lots() {
         </div>
       )}
 
-      {/* ——— View/Edit Lot Modal ——— */}
       {selectedLot && (
         <div className="modal">
           <div className="modal-content">
             <h3>{selectedLot.lotName}</h3>
+
             <div className="modal-icons">
               <button className="history-btn" onClick={viewHistory}>
                 History
@@ -379,11 +531,20 @@ export default function Lots() {
             </label>
             <input
               type="text"
+              list="crop-suggestions"
               value={selectedLot.cropName || ""}
               onChange={(e) =>
-                setSelectedLot((p) => ({ ...p, cropName: e.target.value }))
+                setSelectedLot((prev) => ({
+                  ...prev,
+                  cropName: e.target.value,
+                }))
               }
             />
+            <datalist id="crop-suggestions">
+              {cropSuggestions.map((name, idx) => (
+                <option key={idx} value={name} />
+              ))}
+            </datalist>
 
             <label>
               <strong>Date Planted:</strong>
@@ -392,7 +553,10 @@ export default function Lots() {
               type="date"
               value={selectedLot.plantingDate || ""}
               onChange={(e) =>
-                setSelectedLot((p) => ({ ...p, plantingDate: e.target.value }))
+                setSelectedLot((prev) => ({
+                  ...prev,
+                  plantingDate: e.target.value,
+                }))
               }
             />
 
@@ -402,8 +566,8 @@ export default function Lots() {
             <textarea
               value={(selectedLot.modifications || []).join("\n")}
               onChange={(e) =>
-                setSelectedLot((p) => ({
-                  ...p,
+                setSelectedLot((prev) => ({
+                  ...prev,
                   modifications: e.target.value.split("\n"),
                 }))
               }
@@ -420,48 +584,25 @@ export default function Lots() {
 
             <div className="lots-buttons">
               <button onClick={addModification}>Add Modification</button>
-              <button onClick={openHarvestModal}>Crop Harvested</button>
+              <button onClick={() => setShowHarvestModal(true)}>
+                Crop Harvested
+              </button>
               <button onClick={saveLotChanges}>Done</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ——— Harvest Modal ——— */}
-      {showHarvestModal && selectedLot && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Record Harvest for {selectedLot.lotName}</h3>
+      <HarvestModal
+        show={showHarvestModal}
+        selectedLot={selectedLot}
+        harvestedKilos={harvestedKilos}
+        setHarvestedKilos={setHarvestedKilos}
+        calculateDaysOld={calculateDaysOld}
+        onSaveHarvest={handleHarvestSubmit}
+        onClose={() => setShowHarvestModal(false)}
+      />
 
-            <label>
-              <strong>Harvested Kilos:</strong>
-            </label>
-            <input
-              type="number"
-              placeholder="Enter kilos harvested"
-              value={harvestedKilos}
-              onChange={(e) => setHarvestedKilos(e.target.value)}
-            />
-
-            <p>
-              <strong>Harvest Date:</strong> {new Date().toLocaleString()}
-            </p>
-            <p>
-              <strong>Days Old:</strong>{" "}
-              {selectedLot.plantingDate
-                ? calculateDaysOld(selectedLot.plantingDate)
-                : "N/A"}
-            </p>
-
-            <div className="lots-buttons">
-              <button onClick={handleHarvestSubmit}>Save</button>
-              <button onClick={closeHarvestModal}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ——— Harvest History Modal ——— */}
       {showHistoryModal && (
         <div className="modal">
           <div className="modal-content">
@@ -472,6 +613,7 @@ export default function Lots() {
               <table>
                 <thead>
                   <tr>
+                    <th>Crop Name</th>
                     <th>Date</th>
                     <th>Kilos</th>
                     <th>Days Old</th>
@@ -480,6 +622,7 @@ export default function Lots() {
                 <tbody>
                   {harvestLogs.map((log, i) => (
                     <tr key={i}>
+                      <td>{log.cropName}</td>
                       <td>{new Date(log.harvestedDate).toLocaleString()}</td>
                       <td>{log.harvestedKilos} kg</td>
                       <td>{log.daysOld} days</td>

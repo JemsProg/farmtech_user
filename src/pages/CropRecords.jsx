@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScatterChart,
   Scatter,
@@ -10,9 +10,23 @@ import {
   Line,
 } from "recharts";
 import LotsNavbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 import "../css/CropRecords.css";
 
 export default function CropRecords() {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const uid = localStorage.getItem("user_uid");
+    if (!uid) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setUserId(uid);
+  }, [navigate]);
+
   const [totalPlanted, setTotalPlanted] = useState("");
   const [totalHarvested, setTotalHarvested] = useState("");
   const [totalSpending, setTotalSpending] = useState("");

@@ -5,6 +5,7 @@ import profile from "../images/profile.jpg";
 import logo from "../images/newlogo.png";
 import "../css/Navbar.css";
 
+// Firestore & Auth imports
 import {
   collection,
   addDoc,
@@ -12,7 +13,8 @@ import {
   getDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase.js";
+import { signOut } from "firebase/auth";
+import { db, auth } from "../firebase.js";
 
 export default function Navbar() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -23,18 +25,25 @@ export default function Navbar() {
   });
   const navigate = useNavigate();
 
-  // load farmer name for logging
+  // ────────────────────────────────────────────────────────────────────────────
+  // 1) On mount: load firstName/lastName for the current user (from Firestore)
+  // ────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const uid = localStorage.getItem("user_uid");
-    if (!uid) return;
+    if (!uid) return; // If no UID is stored, we won’t attempt to fetch
+
     (async () => {
-      const snap = await getDoc(doc(db, "users", uid));
-      if (snap.exists()) {
-        const d = snap.data();
-        setUserProfile({
-          firstName: d.firstName || "",
-          lastName: d.lastName || "",
-        });
+      try {
+        const userSnap = await getDoc(doc(db, "users", uid));
+        if (userSnap.exists()) {
+          const d = userSnap.data();
+          setUserProfile({
+            firstName: d.firstName || "",
+            lastName: d.lastName || "",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching user profile in Navbar:", err);
       }
     })();
   }, []);
@@ -48,12 +57,16 @@ export default function Navbar() {
     setShowLogoutModal(true);
   };
 
+  // ────────────────────────────────────────────────────────────────────────────
+  // 2) When “Logout” is confirmed: write a log, clear localStorage, sign out,
+  //    then navigate to /userlogin
+  // ────────────────────────────────────────────────────────────────────────────
   const confirmLogout = async () => {
     setShowLogoutModal(false);
 
     try {
       const uid = localStorage.getItem("user_uid");
-      // write the logout action
+      // 2a) Write the logout action to Firestore (farmer_log collection)
       await addDoc(collection(db, "farmer_log"), {
         userId: uid,
         firstName: userProfile.firstName,
@@ -65,10 +78,18 @@ export default function Navbar() {
       console.error("Failed to log logout action:", err);
     }
 
-    // clear out any stored uid if you like:
-    // localStorage.removeItem("user_uid");
+    // 2b) Clear localStorage so protected pages can’t be accessed
+    localStorage.removeItem("user_uid");
 
-    navigate("/userlogin");
+    // 2c) (Optional) Also sign out from Firebase Auth
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn("Warning: Firebase signOut failed:", err);
+    }
+
+    // 2d) Finally, redirect to the login page
+    navigate("/userlogin", { replace: true });
   };
 
   return (
@@ -109,6 +130,7 @@ export default function Navbar() {
         )}
       </div>
 
+      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="modal-overlay">
           <div className="modal-content">
