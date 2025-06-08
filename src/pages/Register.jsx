@@ -1,9 +1,7 @@
-// src/pages/Register.jsx
 import React, { useState } from "react";
 import "../css/Register.css";
 import { Link, useNavigate } from "react-router-dom";
 
-// Import Auth, Firestore, and Storage from firebase.js
 import { auth, db, storage } from "../firebase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -103,9 +101,36 @@ export default function Register() {
         password
       );
       const user = userCredential.user;
-      console.log("User created:", user.uid);
 
       let uploadedFileURL = "";
+      if (selectedFile) {
+        setUploading(true);
+        const path = `registration_docs/${user.uid}/${selectedFile.name}`;
+        const fileRef = storageRef(storage, path);
+        await uploadBytes(fileRef, selectedFile);
+        uploadedFileURL = await getDownloadURL(fileRef);
+        setUploading(false);
+      }
+
+      // ← Here we add status: "pending"
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        location,
+        mobile: mobile.trim(),
+        status: "Pending",
+        createdAt: new Date(),
+        ...(uploadedFileURL && { documentationURL: uploadedFileURL }),
+      });
+
+      alert(
+        "Registration successful! Your account is now pending admin approval."
+      );
+      navigate("/userlogin");
+
+      console.log("User created:", user.uid);
+
       if (selectedFile) {
         setUploading(true);
 
@@ -126,6 +151,7 @@ export default function Register() {
         email: email.trim(),
         location: location,
         mobile: mobile.trim(),
+        status: "Pending",
         createdAt: new Date(),
         ...(uploadedFileURL && { documentationURL: uploadedFileURL }),
       });

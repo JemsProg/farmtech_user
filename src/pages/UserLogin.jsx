@@ -1,12 +1,13 @@
-// src/pages/UserLogin.jsx
 import React, { useState, useEffect } from "react";
 import "../css/UserLogin.css";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth, db } from "../firebase.js";
 import logo from "../images/newlogo.png";
 
-// Firestore helpers
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+
 import {
   doc,
   getDoc,
@@ -21,17 +22,13 @@ export default function UserLogin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If a farmer is already logged in (user_uid in localStorage), redirect to dashboard
     const uid = localStorage.getItem("user_uid");
-    if (uid) {
-      navigate("/userdash", { replace: true });
-    }
+    if (uid) navigate("/userdash", { replace: true });
   }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // 1) Sign in
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -39,52 +36,74 @@ export default function UserLogin() {
       );
       const user = userCredential.user;
 
-      // 2) Store UID locally
-      localStorage.setItem("user_uid", user.uid);
-
-      // 3) Load the user's profile doc to get firstName / lastName
       const userSnap = await getDoc(doc(db, "users", user.uid));
-      let firstName = "";
-      let lastName = "";
-      if (userSnap.exists()) {
-        const u = userSnap.data();
-        firstName = u.firstName || "";
-        lastName = u.lastName || "";
+      if (!userSnap.exists()) {
+        await signOut(auth);
+        return Swal.fire({
+          icon: "error",
+          title: "No Profile Found",
+          text: "Please register first.",
+        });
+      }
+      const profile = userSnap.data();
+      const status = profile.status || "Pending";
+
+      if (status === "Pending") {
+        await signOut(auth);
+        return Swal.fire({
+          icon: "info",
+          title: "Pending Approval",
+          text: "Your account is still pending approval. Please check back later.",
+        });
+      }
+      if (status === "Denied") {
+        await signOut(auth);
+        return Swal.fire({
+          icon: "error",
+          title: "Account Denied",
+          text: "Your account has been denied. Please contact the administrator.",
+        });
       }
 
-      // 4) Log this login event in `farmer_log`
+      localStorage.setItem("user_uid", user.uid);
       await addDoc(collection(db, "farmer_log"), {
         userId: user.uid,
-        firstName,
-        lastName,
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
         activity: "Farmer login on website",
         date: serverTimestamp(),
       });
 
-      // 5) Redirect
       navigate("/userdash");
     } catch (error) {
       console.error("Login error:", error);
+      let title = "Login failed";
+      let text = error.message;
+      let icon = "error";
+
       switch (error.code) {
         case "auth/user-not-found":
-          alert("No user found with this email. Please register first.");
+          title = "No User Found";
+          text = "Please register first.";
           break;
         case "auth/wrong-password":
-          alert("Incorrect password. Please try again.");
+          title = "Wrong Password";
+          text = "Please try again.";
           break;
         case "auth/invalid-email":
-          alert("Invalid email format. Please check your email.");
+          title = "Invalid Email";
+          text = "Please check your email format.";
           break;
-        default:
-          alert("Login failed: " + error.message);
       }
+
+      Swal.fire({ icon, title, text });
     }
   };
 
   return (
     <div className="userlogin-container">
       <div className="userlogin-left">
-        <div className="userlogin-title-container"></div>
+        <div className="userlogin-title-container" />
         <div className="userlogin-left-content">
           <h1>Hi there!</h1>
           <p>Welcome to FarmTech. Farmer's Dashboard</p>
@@ -95,12 +114,14 @@ export default function UserLogin() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             <div className="userlogin-forgot">
@@ -130,7 +151,7 @@ export default function UserLogin() {
       <div className="userlogin-right-content">
         <img
           src={logo}
-          alt=""
+          alt="FarmTech Logo"
           style={{ height: "100px", objectFit: "contain" }}
         />
       </div>

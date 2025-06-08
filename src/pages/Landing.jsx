@@ -1,4 +1,3 @@
-// src/pages/Landing.jsx
 import React, { useEffect } from "react";
 import "../css/Landing.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +9,6 @@ export default function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If a farmer is already logged in (user_uid in localStorage), redirect to dashboard
     const uid = localStorage.getItem("user_uid");
     if (uid) {
       navigate("/userdash", { replace: true });

@@ -1,11 +1,9 @@
-// src/pages/UserDash.jsx
 import React, { useState, useEffect } from "react";
 import "../css/Userdash.css";
 import weather from "../images/cloudy.png";
 import Navbar from "../components/Navbar.jsx";
 import { useNavigate } from "react-router-dom";
 
-// Firebase imports
 import {
   collection,
   getDocs,
@@ -16,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase.js";
 
-// Recharts imports
 import {
   BarChart,
   Bar,
@@ -200,18 +197,13 @@ export default function UserDash() {
     },
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 1) Check localStorage for user_uid → if missing, redirect to “/”
-  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const uid = localStorage.getItem("user_uid");
     if (!uid) {
-      // no UID: force redirect to landing
       navigate("/", { replace: true });
-      return; // skip the rest of this effect
+      return;
     }
 
-    // Once we know UID exists, fetch that user’s location
     const fetchUserLocation = async () => {
       try {
         const ref = doc(db, "users", uid);
@@ -230,18 +222,13 @@ export default function UserDash() {
     fetchUserLocation();
   }, [navigate]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 2) Fetch forecast & current weather (unchanged)
-  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchForecast = async () => {
-      // (hard‐coded coordinates; feel free to replace with dynamic lat/lon)
       const lat = 14.5995;
       const lon = 120.9842;
       const apiKey = "50474bb45c7fbb1a8406456faa2dab7a";
 
       try {
-        // 1. Fetch 10‐day forecast
         const forecastRes = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=10&appid=${apiKey}&units=metric`
         );
@@ -250,7 +237,6 @@ export default function UserDash() {
           setForecastData(forecastJson.list);
         }
 
-        // 2. Fetch current weather
         const currentRes = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
@@ -267,9 +253,6 @@ export default function UserDash() {
     fetchCropsFromDatabase();
   }, []);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 3) Load all “cavite_crops” from Firestore
-  // ─────────────────────────────────────────────────────────────────────────────
   const fetchCropsFromDatabase = async () => {
     try {
       const snap = await getDocs(collection(db, "cavite_crops"));
@@ -280,22 +263,15 @@ export default function UserDash() {
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 4) Utility: “inRange” allowing 30% padding around each min/max
-  // ─────────────────────────────────────────────────────────────────────────────
   const inRange = (value, [min, max]) => {
     const num = parseFloat(value);
     if (isNaN(num)) return false;
     const rangeWidth = max - min;
-    const softMin = min - rangeWidth * 0.3; // 30% below
-    const softMax = max + rangeWidth * 0.3; // 30% above
+    const softMin = min - rangeWidth * 0.3;
+    const softMax = max + rangeWidth * 0.3;
     return num >= softMin && num <= softMax;
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 5) Match recommended crops whenever we have:
-  //    • cropsFromDB  • forecastData  • selectedLocation
-  // ─────────────────────────────────────────────────────────────────────────────
   const matchRecommendedCrops = () => {
     const todayWeather = forecastData[0] || {};
     const temperature = todayWeather?.temp?.day ?? 30;
@@ -305,7 +281,6 @@ export default function UserDash() {
     if (!soil) return;
 
     const matches = cropsFromDB.filter((crop) => {
-      // Convert Firestore strings to floats
       const parsedCrop = {
         ...crop,
         N: parseFloat(crop.N),
@@ -337,14 +312,8 @@ export default function UserDash() {
     }
   }, [cropsFromDB, forecastData, selectedLocation]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 6) Summarize total kilos from harvestData
-  // ─────────────────────────────────────────────────────────────────────────────
   const totalKilos = harvestData.reduce((sum, crop) => sum + crop.kilos, 0);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 7) Render
-  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <>
       <div className="userdash-layout">
@@ -352,7 +321,6 @@ export default function UserDash() {
         <div className="userdash-main-content">
           <h1 className="userdash-title">Dashboard</h1>
 
-          {/* SELECT LOCATION */}
           <div className="userdash-location">
             <select
               name="location"
@@ -391,7 +359,6 @@ export default function UserDash() {
             </select>
           </div>
 
-          {/* WEATHER SUMMARY */}
           <div className="userdash-weather-content">
             <div className="userdash-weather-left">
               <p>Current Weather</p>
@@ -492,7 +459,6 @@ export default function UserDash() {
             </div>
           </div>
 
-          {/* CROP RECOMMENDATIONS */}
           <div className="userdash-recommendation-content">
             <h2>Recommendation</h2>
             <p>
@@ -532,9 +498,7 @@ export default function UserDash() {
         </div>
       </div>
 
-      {/* CHARTS SECTION */}
       <div className="userdash-charts" style={{ display: "flex", gap: "40px" }}>
-        {/* Total Harvested Bar Chart */}
         <div
           style={{
             flex: 1,
@@ -569,7 +533,6 @@ export default function UserDash() {
           </ResponsiveContainer>
         </div>
 
-        {/* Top 5 Harvested Pie Chart */}
         <div
           style={{
             flex: 1,
@@ -608,7 +571,6 @@ export default function UserDash() {
         </div>
       </div>
 
-      {/* OPTIONAL: If you ever open showModal, here's a sample modal layout */}
       {showModal && selectedCrop && (
         <div
           style={{
@@ -671,7 +633,6 @@ export default function UserDash() {
         </div>
       )}
 
-      {/* INLINE ANIMATIONS */}
       <style>
         {`
           .userdash-layout {

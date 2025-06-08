@@ -19,7 +19,7 @@ export default function Profile() {
       const snap = await getDoc(ref);
 
       if (snap.exists()) {
-        console.log("user data:", snap.data()); // ✅ Now only logs if it exists
+        console.log("user data:", snap.data());
         setUserData(snap.data());
         setEditData(snap.data());
       } else {

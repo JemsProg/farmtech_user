@@ -89,7 +89,6 @@ export default function Guides() {
                 : new Date(selectedGuide.createdAt).toLocaleDateString()}
             </p>
 
-            {/* force remount on each open by giving object a new key */}
             <object
               key={selectedGuide.id}
               data={selectedGuide.pdfURL}

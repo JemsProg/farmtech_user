@@ -52,19 +52,12 @@ export default function CropRecords() {
       return;
     }
 
-    // 1. SRP = total spending × (1 + margin/100) ÷ total harvested
     const calculatedSrp = (spent * (1 + margin / 100)) / harvested;
-    // 2. Total Earning = SRP × total harvested
     const earnings = calculatedSrp * harvested;
-    // 3. Profit = Total Earning − Total Spending
     const calculatedProfit = earnings - spent;
-    // 4. ROI = (Profit ÷ Total Spending) × 100
     const calculatedRoi = (calculatedProfit / spent) * 100;
-    // 5. Crop Loss = Total Planted − Total Harvested
     const lossQty = planted - harvested;
-    // 6. Loss Value = Crop Loss × SRP
     const lossValue = lossQty * calculatedSrp;
-    // 7. Harvest Efficiency = (Total Harvested ÷ Total Planted) × 100
     const eff = planted > 0 ? (harvested / planted) * 100 : 0;
 
     setSrp(calculatedSrp);
@@ -75,7 +68,6 @@ export default function CropRecords() {
     setCropLossValue(lossValue);
     setEfficiency(eff);
 
-    // generate chart points around SRP ±20%
     const pts = [];
     const min = calculatedSrp * 0.8;
     const max = calculatedSrp * 1.2;
@@ -157,7 +149,6 @@ export default function CropRecords() {
               Calculate
             </button>
 
-            {/* Summary Section */}
             <div className="summary-box">
               <h4>Summary</h4>
               <p>Suggested Retail Price (SRP): ₱{srp.toFixed(2)}</p>
