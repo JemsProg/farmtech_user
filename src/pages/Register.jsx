@@ -288,7 +288,7 @@ export default function Register() {
                 fontWeight: "500",
               }}
             >
-              Documentation (PDF or Image)
+              Documentation (Image)
             </label>
             <input
               id="documentation"
